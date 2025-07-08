@@ -22,6 +22,10 @@ contract FundMe {
     uint256 deploymentTimestamp; // seconds
     uint256 lockTime;
 
+    address erc20Addr;
+
+    bool public getFundSuccess = false;
+
     constructor(uint256 _lockTime) {
         dataFeed = AggregatorV3Interface(
             0x694AA1769357215DE4FAC081bf1f309aDC325306
@@ -93,6 +97,7 @@ contract FundMe {
         );     
         require(success, "transfer transcation is failed");
         fundersToAmount[msg.sender] = 0;
+        getFundSuccess = true;
     }
 
     function refund() external windowClosed {
@@ -108,6 +113,15 @@ contract FundMe {
         }("");
         require(success, "transfer transcation is failed");
         fundersToAmount[msg.sender] = 0;
+    }
+
+    function setFunderToAmount(address funder, uint256 amount) external {
+        require(msg.sender == erc20Addr, "You do not have permission to call this function");
+        fundersToAmount[funder] = amount;
+    }
+
+    function setErc20addr(address _erc20Addr) public onlyOwner {
+        erc20Addr = _erc20Addr;
     }
 
     modifier windowClosed() {
